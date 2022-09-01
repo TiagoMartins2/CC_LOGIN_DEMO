@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <eidlib.h>
 #include <eidlibcompat.h>
 #include <eidlibcompat.h>
@@ -12,11 +13,10 @@ using namespace eIDMW;
 using namespace std;
 
 int main() {
-
+	char user[] = "152863567";
 	string p;
-	string check_login;
 	PTEID_InitSDK();
-	PTEID_Config::SetTestMode(true); //MODO TESTE!!!!
+
 	do{
 		cout << "===============================" << endl;
 		cout << "           LOG IN" << endl;
@@ -33,51 +33,62 @@ int main() {
 			cout << "           LOG IN" << endl;
 			cout << "===============================" << endl;
 			cout << "\n\n\nInsert the Password (PIN of the CC Card)..." << endl;
-			
-			char pin_inserted;
-			cin >> pin_inserted;
+			cout << "\n\n\n===============================" << endl;
+			cout << "===============================" << endl;
 
-			char cc_pin;
+			char csPin[4];
+			cin >> csPin;
+
 			try {
 				PTEID_ReaderSet& readerSet = PTEID_ReaderSet::instance();
-				PTEID_ReaderContext& readerContext = readerSet.getReader();
+				PTEID_ReaderContext& readerContext = PTEID_ReaderSet::instance().getReader();
 				PTEID_EIDCard& eidCard = readerContext.getEIDCard();
 				PTEID_EId& eid = eidCard.getID();
 				PTEID_Pins& pins = eidCard.getPins();
-				check_login = eid.getCountry();
-
-				for (int i = 0; i < pins.count(); i++) {
-					PTEID_Pin& pin = pins.getPinByNumber(i);
+				
+				unsigned long triesLeft;
+				//Get the specific PIN object needed
+				//ADDR_PIN - Address Pin
+				//AUTH_PIN - Authentication Pin
+				//SIGN_PIN - Signature Pin
+				//MUDAR PARA AUTHENTICATION PIN
+				PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::ADDR_PIN);
+				if (pin.verifyPin(csPin, triesLeft, true) && strcmp(eid.getCivilianIdNumber(), user) == 0) {
+					system("CLS");
+					cout << "===============================" << endl;
+					cout << "           MENU" << endl;
+					cout << "===============================" << endl;
+					cout << "\n\n\nWelcome " << eid.getGivenName() << " " << eid.getSurname() << endl;
+					cout << "\n\n\Press 0 to leave... " << endl;
+					cout << "\n\n\n===============================" << endl;
+					cout << "===============================" << endl;
 					
-					if (strcmp(pin.getLabel(), "PIN da Autenticação") == 0) {
-						cout << "SUCESSO" << endl;
-					}
-					else {
-						cout << "Nao ao sucesso" << endl;
-					}
+
+					cin >> p;
+				}
+				else {
+					throw invalid_argument("THE PIN IS NOT CORRECT");
+					p = "0";
 				}
 			}
 			catch (PTEID_ExNoReader& e)
 			{
 				std::cerr << "No readers found!" << std::endl;
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 				p = "0";
 			}
 			catch (PTEID_ExNoCardPresent& e)
 			{
 				std::cerr << "No card found in the reader!" << std::endl;
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 				p = "0";
 			}
 			catch (PTEID_Exception& e)
 			{
 				std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 				p = "0";
-			}			
+			}		
+			PTEID_ReleaseSDK();
 		}
 	} while (p != "0");
-	PTEID_ReleaseSDK();
 	return 0;
 }
 
