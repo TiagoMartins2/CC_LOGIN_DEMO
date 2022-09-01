@@ -32,15 +32,30 @@ int main() {
 			cout << "===============================" << endl;
 			cout << "           LOG IN" << endl;
 			cout << "===============================" << endl;
-			cout << "\n\n\nInsert the CC Card" << endl;
+			cout << "\n\n\nInsert the Password (PIN of the CC Card)..." << endl;
+			
+			char pin_inserted;
+			cin >> pin_inserted;
 
+			char cc_pin;
 			try {
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 				PTEID_ReaderSet& readerSet = PTEID_ReaderSet::instance();
 				PTEID_ReaderContext& readerContext = readerSet.getReader();
 				PTEID_EIDCard& eidCard = readerContext.getEIDCard();
 				PTEID_EId& eid = eidCard.getID();
+				PTEID_Pins& pins = eidCard.getPins();
 				check_login = eid.getCountry();
+
+				for (int i = 0; i < pins.count(); i++) {
+					PTEID_Pin& pin = pins.getPinByNumber(i);
+					
+					if (strcmp(pin.getLabel(), "PIN da Autenticação") == 0) {
+						cout << "SUCESSO" << endl;
+					}
+					else {
+						cout << "Nao ao sucesso" << endl;
+					}
+				}
 			}
 			catch (PTEID_ExNoReader& e)
 			{
@@ -59,20 +74,7 @@ int main() {
 				std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
 				std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 				p = "0";
-			}
-			if (!check_login.empty()) {
-				
-				system("CLS");
-				cout << "===============================" << endl;
-				cout << "           LOG IN" << endl;
-				cout << "===============================" << endl;
-				cout << "\n\n\nInsert the CC PIN" << endl;
-
-			}
-			else {
-				
-			}
-			
+			}			
 		}
 	} while (p != "0");
 	PTEID_ReleaseSDK();
