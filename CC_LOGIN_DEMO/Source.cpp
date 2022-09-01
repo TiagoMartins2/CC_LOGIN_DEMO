@@ -36,7 +36,7 @@ int main() {
 			cout << "\n\n\n===============================" << endl;
 			cout << "===============================" << endl;
 
-			char csPin[4];
+			char csPin[1000];
 			cin >> csPin;
 
 			try {
@@ -53,6 +53,7 @@ int main() {
 				//SIGN_PIN - Signature Pin
 				//MUDAR PARA AUTHENTICATION PIN
 				PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::ADDR_PIN);
+				p = "0";
 				if (pin.verifyPin(csPin, triesLeft, true) && strcmp(eid.getCivilianIdNumber(), user) == 0) {
 					system("CLS");
 					cout << "===============================" << endl;
@@ -63,12 +64,8 @@ int main() {
 					cout << "\n\n\n===============================" << endl;
 					cout << "===============================" << endl;
 					
-
+					p = "a";
 					cin >> p;
-				}
-				else {
-					throw invalid_argument("THE PIN IS NOT CORRECT");
-					p = "0";
 				}
 			}
 			catch (PTEID_ExNoReader& e)
