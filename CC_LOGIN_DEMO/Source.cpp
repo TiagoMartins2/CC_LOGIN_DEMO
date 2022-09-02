@@ -32,7 +32,7 @@ int main() {
 			cout << "===============================" << endl;
 			cout << "           LOG IN" << endl;
 			cout << "===============================" << endl;
-			cout << "\n\n\nInsert the Password (PIN of the CC Card)..." << endl;
+			cout << "\n\n\nInsert the Password (PIN da Morada)..." << endl;
 			cout << "\n\n\n===============================" << endl;
 			cout << "===============================" << endl;
 
