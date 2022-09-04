@@ -14,12 +14,19 @@ using namespace std;
 
 
 PTEID_ReaderContext& ReturnReader();
+PTEID_EIDCard& ReturnEIDCard();
+PTEID_EId& ReturnEID();
+PTEID_Pin& ReturnADDR_PIN();
+PTEID_Pin& ReturnAUTH_PIN();
+bool checkUser(char pinInserted[100]);
+bool checkIDUser(char user[]);
+string getFullName();
 
 
 int main() {
 	char user[] = "152863567";
 	string p;
-	PTEID_InitSDK();
+	//PTEID_InitSDK();
 
 	do{
 		cout << "===============================" << endl;
@@ -43,53 +50,25 @@ int main() {
 			char csPin[1000];
 			cin >> csPin;
 
-			try {
-				PTEID_ReaderSet& readerSet = PTEID_ReaderSet::instance();
-				PTEID_ReaderContext& readerContext = PTEID_ReaderSet::instance().getReader();
-				PTEID_EIDCard& eidCard = readerContext.getEIDCard();
-				PTEID_EId& eid = eidCard.getID();
-				PTEID_Pins& pins = eidCard.getPins();
-				
-				unsigned long triesLeft;
-				//Get the specific PIN object needed
-				//ADDR_PIN - Address Pin
-				//AUTH_PIN - Authentication Pin
-				//SIGN_PIN - Signature Pin
-				//MUDAR PARA AUTHENTICATION PIN
-				PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::ADDR_PIN);
-				p = "0";
-				if (pin.verifyPin(csPin, triesLeft, true) && strcmp(eid.getCivilianIdNumber(), user) == 0) {
-					system("CLS");
-					cout << "===============================" << endl;
-					cout << "           MENU" << endl;
-					cout << "===============================" << endl;
-					cout << "\n\n\nWelcome " << eid.getGivenName() << " " << eid.getSurname() << endl;
-					cout << "\n\n\n Press 0 to leave... " << endl;
-					cout << "\n\n\n===============================" << endl;
-					cout << "===============================" << endl;
+			
+			/*p = "0";*/
+			if (checkUser(csPin) == 0 && checkIDUser(user) == 0) {
+				system("CLS");
+				cout << "===============================" << endl;
+				cout << "           MENU" << endl;
+				cout << "===============================" << endl;
+				cout << "\n\n\nWelcome " << getFullName() << endl;
+				cout << "\n\n\n Press 0 to leave... " << endl;
+				cout << "\n\n\n===============================" << endl;
+				cout << "===============================" << endl;
 					
-					p = "a";
-					cin >> p;
-				}
-			}
-			catch (PTEID_ExNoReader& e)
-			{
-				std::cerr << "No readers found!" << std::endl;
-				p = "0";
-			}
-			catch (PTEID_ExNoCardPresent& e)
-			{
-				std::cerr << "No card found in the reader!" << std::endl;
-				p = "0";
-			}
-			catch (PTEID_Exception& e)
-			{
-				std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
-				p = "0";
+				p = "a";
+				cin >> p;
 			}		
-			PTEID_ReleaseSDK();
 		}
 	} while (p != "0");
+
+	//PTEID_ReleaseSDK();
 	return 0;
 }
 
@@ -114,8 +93,22 @@ PTEID_ReaderContext& ReturnReader() {
 PTEID_EIDCard& ReturnEIDCard() {
 	PTEID_InitSDK();
 
-	PTEID_EIDCard& eIDCard = ReturnReader().getEIDCard();
-	return eIDCard;
+	try {
+		PTEID_EIDCard& eIDCard = ReturnReader().getEIDCard();
+		return eIDCard;
+	}
+	catch (PTEID_ExNoReader& e)
+	{
+		std::cerr << "No readers found!" << std::endl;
+	}
+	catch (PTEID_ExNoCardPresent& e)
+	{
+		std::cerr << "No card found in the reader!" << std::endl;
+	}
+	catch (PTEID_Exception& e)
+	{
+		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
+	}
 
 	PTEID_ReleaseSDK();
 }
@@ -126,8 +119,22 @@ PTEID_EIDCard& ReturnEIDCard() {
 PTEID_EId& ReturnEID() {
 	PTEID_InitSDK();
 
-	PTEID_EId& eid = ReturnEIDCard().getID();
-	return eid;
+	try {
+		PTEID_EId& eid = ReturnEIDCard().getID();
+		return eid;
+	}
+	catch (PTEID_ExNoReader& e)
+	{
+		std::cerr << "No readers found!" << std::endl;
+	}
+	catch (PTEID_ExNoCardPresent& e)
+	{
+		std::cerr << "No card found in the reader!" << std::endl;
+	}
+	catch (PTEID_Exception& e)
+	{
+		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
+	}
 
 	PTEID_ReleaseSDK();
 }
@@ -161,8 +168,6 @@ PTEID_Pin& ReturnAUTH_PIN() {
 
 
 //CHECK IF THE PASSWORD IS CORRECT 
-//IF RETURN 1 IS FALSE 
-//IF RETURN 0 IS TRUE
 bool checkUser(char pinInserted[100]) {
 	PTEID_InitSDK();
 
@@ -174,3 +179,44 @@ bool checkUser(char pinInserted[100]) {
 	PTEID_ReleaseSDK();
 }
 
+
+
+//CHECK IF THE Civilian ID Number is the same as in the database
+bool checkIDUser(char user[]) {
+	PTEID_InitSDK();
+
+	try {
+		PTEID_EId& userI = ReturnEID();
+		bool a = strcmp(userI.getCivilianIdNumber(), user);
+		return a;
+	}
+	catch (PTEID_ExNoReader& e)
+	{
+		std::cerr << "No readers found!" << std::endl;
+	}
+	catch (PTEID_ExNoCardPresent& e)
+	{
+		std::cerr << "No card found in the reader!" << std::endl;
+	}
+	catch (PTEID_Exception& e)
+	{
+		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
+	}
+
+	PTEID_ReleaseSDK();
+}
+
+
+
+//RETURN THE NAME AND SURNAME OF THE USER
+string getFullName() {
+	PTEID_InitSDK();
+
+	PTEID_EId& userN = ReturnEID();
+	string name = userN.getGivenName();
+	string surname = userN.getSurname();
+	string fullname = name + " " + surname;
+	return fullname;
+
+	PTEID_ReleaseSDK();
+}
