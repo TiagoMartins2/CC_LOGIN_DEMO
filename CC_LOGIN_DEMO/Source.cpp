@@ -26,6 +26,7 @@ string getFullName();
 int getNumberReaders();
 int getNumberTriesAUTH();
 int getNumberTriesADDR();
+bool checkCardPresent();
 
 
 int main() {
@@ -55,13 +56,21 @@ int main() {
 			string leave;
 			cin >> leave;
 			p = "0";
-		}/*
-		else if () {
+		}
 
+		else if (checkCardPresent() == 0) {
+			system("CLS");
+			cout << "===============================" << endl;
+			cout << "     CARTAO NÃO ENCONTRADO" << endl;
+			cout << "===============================" << endl;
+			cout << "\n\n\nPress any to leave..." << endl;
+			cout << "\n\n\n===============================" << endl;
+			cout << "===============================" << endl;
+			string leave;
+			cin >> leave;
+			p = "0";
+		}
 
-
-
-		}*/
 		else if (getNumberTriesADDR() == 0) {
 			system("CLS");
 			cout << "===============================" << endl;
@@ -391,11 +400,13 @@ int getNumberTriesADDR() {
 
 
 
-////RETURN THE NUMBER OF EXISTING CARDS
-//int getNumberCards() {
-//	PTEID_InitSDK();
-//
-//	
-//
-//	PTEID_ReleaseSDK();
-//}
+//RETURN THE NUMBER OF EXISTING CARDS
+bool checkCardPresent() {
+	PTEID_InitSDK();
+
+	PTEID_ReaderContext& readerC = PTEID_ReaderSet::instance().getReader();
+	bool cardPresent = readerC.isCardPresent();
+	return cardPresent;
+
+	PTEID_ReleaseSDK();
+}
