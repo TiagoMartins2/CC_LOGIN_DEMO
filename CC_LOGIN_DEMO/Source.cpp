@@ -82,6 +82,30 @@ int main() {
 
 					cin >> p;
 				}
+				else if(checkADDRPinUser(csPin) == 0) {
+					system("CLS");
+					cout << "===============================" << endl;
+					cout << "         LOG IN ERROR" << endl;
+					cout << "===============================" << endl;
+					cout << "\n\n\nWrong PIN inserted" << endl;
+					cout << "\nPress any to continue..." << endl;
+					cout << "\nPress 0 to leave... " << endl;
+					cout << "\n\n\n===============================" << endl;
+					cout << "===============================" << endl;
+					cin >> p;
+				}
+				else if(checkIDUser(userS) == 0) {
+					system("CLS");
+					cout << "===============================" << endl;
+					cout << "         LOG IN ERROR" << endl;
+					cout << "===============================" << endl;
+					cout << "\n\n\nNNo user found with the same ID" << endl;
+					cout << "\nPress any to continue..." << endl;
+					cout << "\nPress 0 to leave... " << endl;
+					cout << "\n\n\n===============================" << endl;
+					cout << "===============================" << endl;
+					cin >> p;
+				}
 			}
 		}
 	} while (p != "0");
