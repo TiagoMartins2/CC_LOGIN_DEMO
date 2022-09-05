@@ -24,13 +24,14 @@ bool checkAUTHPinUser(char pinInserted[100]);
 bool checkIDUser(string user);
 string getFullName();
 int getNumberReaders();
+int getNumberTriesAUTH();
+int getNumberTriesADDR();
 
 
 int main() {
 	string userS = "152863567";
 	string p;
 	PTEID_InitSDK();
-	  
 
 	do{
 		system("CLS");
@@ -54,7 +55,27 @@ int main() {
 			string leave;
 			cin >> leave;
 			p = "0";
-		}else{
+		}/*
+		else if () {
+
+
+
+
+		}*/
+		else if (getNumberTriesADDR() == 0) {
+			system("CLS");
+			cout << "===============================" << endl;
+			cout << "        PIN BLOQUEADO" << endl;
+			cout << "===============================" << endl;
+			cout << "\n\n\nPress any to leave..." << endl;
+			cout << "\n\n\n===============================" << endl;
+			cout << "===============================" << endl;
+			string leave;
+			cin >> leave;
+			p = "0";
+
+		}
+		else {
 
 			if (p != "0") {
 				system("CLS");
@@ -330,6 +351,7 @@ string getFullName() {
 }
 
 
+
 //RETURN THE NUMBER OF READERS
 int getNumberReaders() {
 	PTEID_InitSDK();
@@ -340,3 +362,40 @@ int getNumberReaders() {
 
 	PTEID_ReleaseSDK();
 }
+
+
+
+//RETURN THE NUMBER OF TRIES LEFT IN AUTH PIN
+int getNumberTriesAUTH() {
+	PTEID_InitSDK();
+
+	PTEID_Pin& pinAUTH = ReturnAUTH_PIN();
+	int tries = pinAUTH.getTriesLeft();
+	return tries;
+
+	PTEID_ReleaseSDK();
+}
+
+
+
+//RETURN THE NUMBER OF TRIES LEFT IN ADDR PIN
+int getNumberTriesADDR() {
+	PTEID_InitSDK();
+
+	PTEID_Pin& pinADDR = ReturnADDR_PIN();
+	int tries = pinADDR.getTriesLeft();
+	return tries;
+
+	PTEID_ReleaseSDK();
+}
+
+
+
+////RETURN THE NUMBER OF EXISTING CARDS
+//int getNumberCards() {
+//	PTEID_InitSDK();
+//
+//	
+//
+//	PTEID_ReleaseSDK();
+//}
