@@ -19,15 +19,18 @@ PTEID_EIDCard& ReturnEIDCard();
 PTEID_EId& ReturnEID();
 PTEID_Pin& ReturnADDR_PIN();
 PTEID_Pin& ReturnAUTH_PIN();
-bool checkUser(char pinInserted[100]);
+bool checkADDRPinUser(char pinInserted[100]);
+bool checkAUTHPinUser(char pinInserted[100]);
 bool checkIDUser(string user);
 string getFullName();
+int getNumberReaders();
 
 
 int main() {
 	string userS = "152863567";
 	string p;
 	PTEID_InitSDK();
+	  
 
 	do{
 		system("CLS");
@@ -40,13 +43,16 @@ int main() {
 		cout << "===============================" << endl;
 		cin >> p;
 
-		if (p == "?") {
+		if (getNumberReaders() <= 0) {
 			system("CLS");
-			cout << "LEITOR NAO ENCONTRADO" << endl;
-			cout << "pressione para sair..." << endl;
-			string a;
-			cin >> a;
-			
+			cout << "===============================" << endl;
+			cout << "     LEITOR NAO ENCONTRADO" << endl;
+			cout << "===============================" << endl;
+			cout << "\n\n\nPress any to leave..." << endl;
+			cout << "\n\n\n===============================" << endl;
+			cout << "===============================" << endl;
+			string leave;
+			cin >> leave;
 			p = "0";
 		}else{
 
@@ -63,18 +69,17 @@ int main() {
 				cin >> csPin;
 
 
-				/*p = "0";*/
-				if (checkUser(csPin) == 1 && checkIDUser(userS) == 1) {
+				if (checkADDRPinUser(csPin) == 1 && checkIDUser(userS) == 1) {
 					system("CLS");
 					cout << "===============================" << endl;
 					cout << "           MENU" << endl;
 					cout << "===============================" << endl;
 					cout << "\n\n\nWelcome " << getFullName() << endl;
-					cout << "\n\n\n Press 0 to leave... " << endl;
+					cout << "\n\n\nPress any to continue..." << endl;
+					cout << "\n\n Press 0 to leave... " << endl;
 					cout << "\n\n\n===============================" << endl;
 					cout << "===============================" << endl;
 
-					p = "a";
 					cin >> p;
 				}
 			}
@@ -219,11 +224,31 @@ PTEID_Pin& ReturnAUTH_PIN() {
 
 
 
-//CHECK IF THE PASSWORD IS CORRECT 
-bool checkUser(char pinInserted[100]) {
+//CHECK IF THE ADDRESS PIN IS CORRECT 
+bool checkADDRPinUser(char pinInserted[100]) {
 	PTEID_InitSDK();
 
-	PTEID_Pin& pinAUTH = ReturnADDR_PIN();
+	PTEID_Pin& pinADDR = ReturnADDR_PIN();
+	if (pinADDR.getTriesLeft() > 0) {
+		unsigned long triesLeft;
+		bool a = pinADDR.verifyPin(pinInserted, triesLeft, true);
+		return a;
+	}
+	else {
+		cout << "This pin has no more tries left..." << endl;
+		return 0;
+	}
+
+	PTEID_ReleaseSDK();
+}
+
+
+
+//CHECK IF THE AUTHENTICATION PIN IS CORRECT 
+bool checkAUTHPinUser(char pinInserted[100]) {
+	PTEID_InitSDK();
+
+	PTEID_Pin& pinAUTH = ReturnAUTH_PIN();
 	if (pinAUTH.getTriesLeft() > 0) {
 		unsigned long triesLeft;
 		bool a = pinAUTH.verifyPin(pinInserted, triesLeft, true);
@@ -276,6 +301,18 @@ string getFullName() {
 	string surname = userN.getSurname();
 	string fullname = name + " " + surname;
 	return fullname;
+
+	PTEID_ReleaseSDK();
+}
+
+
+//RETURN THE NUMBER OF READERS
+int getNumberReaders() {
+	PTEID_InitSDK();
+
+	PTEID_ReaderSet& readerSet = PTEID_ReaderSet::instance();
+	int reader_count = readerSet.readerCount();
+	return reader_count;
 
 	PTEID_ReleaseSDK();
 }
