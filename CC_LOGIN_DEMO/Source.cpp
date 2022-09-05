@@ -13,22 +13,24 @@ using namespace eIDMW;
 using namespace std;
 
 
+
 PTEID_ReaderContext& ReturnReader();
 PTEID_EIDCard& ReturnEIDCard();
 PTEID_EId& ReturnEID();
 PTEID_Pin& ReturnADDR_PIN();
 PTEID_Pin& ReturnAUTH_PIN();
 bool checkUser(char pinInserted[100]);
-bool checkIDUser(char user[]);
+bool checkIDUser(string user);
 string getFullName();
 
 
 int main() {
-	char user[] = "152863567";
+	string userS = "152863567";
 	string p;
-	//PTEID_InitSDK();
+	PTEID_InitSDK();
 
 	do{
+		system("CLS");
 		cout << "===============================" << endl;
 		cout << "           LOG IN" << endl;
 		cout << "===============================" << endl;
@@ -38,37 +40,48 @@ int main() {
 		cout << "===============================" << endl;
 		cin >> p;
 
-		if (p != "0") {
+		if (p == "?") {
 			system("CLS");
-			cout << "===============================" << endl;
-			cout << "           LOG IN" << endl;
-			cout << "===============================" << endl;
-			cout << "\n\n\nInsert the Password (PIN da Morada)..." << endl;
-			cout << "\n\n\n===============================" << endl;
-			cout << "===============================" << endl;
-
-			char csPin[1000];
-			cin >> csPin;
-
+			cout << "LEITOR NAO ENCONTRADO" << endl;
+			cout << "pressione para sair..." << endl;
+			string a;
+			cin >> a;
 			
-			/*p = "0";*/
-			if (checkUser(csPin) == 0 && checkIDUser(user) == 0) {
+			p = "0";
+		}else{
+
+			if (p != "0") {
 				system("CLS");
 				cout << "===============================" << endl;
-				cout << "           MENU" << endl;
+				cout << "           LOG IN" << endl;
 				cout << "===============================" << endl;
-				cout << "\n\n\nWelcome " << getFullName() << endl;
-				cout << "\n\n\n Press 0 to leave... " << endl;
+				cout << "\n\n\nInsert the Password (PIN da Morada)..." << endl;
 				cout << "\n\n\n===============================" << endl;
 				cout << "===============================" << endl;
-					
-				p = "a";
-				cin >> p;
-			}		
+
+				char csPin[1000];
+				cin >> csPin;
+
+
+				/*p = "0";*/
+				if (checkUser(csPin) == 1 && checkIDUser(userS) == 1) {
+					system("CLS");
+					cout << "===============================" << endl;
+					cout << "           MENU" << endl;
+					cout << "===============================" << endl;
+					cout << "\n\n\nWelcome " << getFullName() << endl;
+					cout << "\n\n\n Press 0 to leave... " << endl;
+					cout << "\n\n\n===============================" << endl;
+					cout << "===============================" << endl;
+
+					p = "a";
+					cin >> p;
+				}
+			}
 		}
 	} while (p != "0");
 
-	//PTEID_ReleaseSDK();
+	PTEID_ReleaseSDK();
 	return 0;
 }
 
@@ -79,11 +92,22 @@ int main() {
 
 //RETURN THE SMART CARD READER CONNECTED TO THE SYSTEM
 PTEID_ReaderContext& ReturnReader() {
+	
 	PTEID_InitSDK();
-
-	PTEID_ReaderContext& readerC = PTEID_ReaderSet::instance().getReader();
-	return readerC;
-
+	
+	try {
+		PTEID_ReaderContext& readerC = PTEID_ReaderSet::instance().getReader();
+		return readerC;
+	}
+	catch (PTEID_ExNoReader& e)
+	{
+		std::cerr << "No readers found!555" << std::endl;
+	}
+	catch (PTEID_Exception& e)
+	{
+		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
+	}
+	
 	PTEID_ReleaseSDK();
 }
 
@@ -99,7 +123,7 @@ PTEID_EIDCard& ReturnEIDCard() {
 	}
 	catch (PTEID_ExNoReader& e)
 	{
-		std::cerr << "No readers found!" << std::endl;
+		std::cerr << "No readers found!444" << std::endl;
 	}
 	catch (PTEID_ExNoCardPresent& e)
 	{
@@ -109,7 +133,7 @@ PTEID_EIDCard& ReturnEIDCard() {
 	{
 		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
 	}
-
+	
 	PTEID_ReleaseSDK();
 }
 
@@ -125,7 +149,7 @@ PTEID_EId& ReturnEID() {
 	}
 	catch (PTEID_ExNoReader& e)
 	{
-		std::cerr << "No readers found!" << std::endl;
+		std::cerr << "No readers found!111" << std::endl;
 	}
 	catch (PTEID_ExNoCardPresent& e)
 	{
@@ -145,9 +169,23 @@ PTEID_EId& ReturnEID() {
 PTEID_Pin& ReturnADDR_PIN() {
 	PTEID_InitSDK();
 
-	PTEID_Pins& pins = ReturnEIDCard().getPins();
-	PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::ADDR_PIN);
-	return pin;
+	try {
+		PTEID_Pins& pins = ReturnEIDCard().getPins();
+		PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::ADDR_PIN);
+		return pin;
+	}
+	catch (PTEID_ExNoReader& e)
+	{
+		std::cerr << "No readers found!222" << std::endl;
+	}
+	catch (PTEID_ExNoCardPresent& e)
+	{
+		std::cerr << "No card found in the reader!" << std::endl;
+	}
+	catch (PTEID_Exception& e)
+	{
+		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
+	}
 
 	PTEID_ReleaseSDK();
 }
@@ -158,9 +196,23 @@ PTEID_Pin& ReturnADDR_PIN() {
 PTEID_Pin& ReturnAUTH_PIN() {
 	PTEID_InitSDK();
 
-	PTEID_Pins& pins = ReturnEIDCard().getPins();
-	PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::AUTH_PIN);
-	return pin;
+	try {
+		PTEID_Pins& pins = ReturnEIDCard().getPins();
+		PTEID_Pin& pin = pins.getPinByPinRef(PTEID_Pin::AUTH_PIN);
+		return pin;
+	}
+	catch (PTEID_ExNoReader& e)
+	{
+		std::cerr << "No readers found!333" << std::endl;
+	}
+	catch (PTEID_ExNoCardPresent& e)
+	{
+		std::cerr << "No card found in the reader!" << std::endl;
+	}
+	catch (PTEID_Exception& e)
+	{
+		std::cerr << "Caught exception in some SDK method. Error: " << e.GetMessage() << std::endl;
+	}
 
 	PTEID_ReleaseSDK();
 }
@@ -171,10 +223,16 @@ PTEID_Pin& ReturnAUTH_PIN() {
 bool checkUser(char pinInserted[100]) {
 	PTEID_InitSDK();
 
-	PTEID_Pin& pinAUTH = ReturnAUTH_PIN();
-	unsigned long triesLeft;
-	bool a = pinAUTH.verifyPin(pinInserted, triesLeft, true);
-	return a;
+	PTEID_Pin& pinAUTH = ReturnADDR_PIN();
+	if (pinAUTH.getTriesLeft() > 0) {
+		unsigned long triesLeft;
+		bool a = pinAUTH.verifyPin(pinInserted, triesLeft, true);
+		return a;
+	}
+	else {
+		cout << "This pin has no more tries left..." << endl;
+		return 0;
+	}
 
 	PTEID_ReleaseSDK();
 }
@@ -182,12 +240,13 @@ bool checkUser(char pinInserted[100]) {
 
 
 //CHECK IF THE Civilian ID Number is the same as in the database
-bool checkIDUser(char user[]) {
+bool checkIDUser(string userS) {
 	PTEID_InitSDK();
 
 	try {
 		PTEID_EId& userI = ReturnEID();
-		bool a = strcmp(userI.getCivilianIdNumber(), user);
+		string userID = userI.getCivilianIdNumber();
+		bool a = userID == userS;
 		return a;
 	}
 	catch (PTEID_ExNoReader& e)
